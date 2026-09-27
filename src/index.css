@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* Imagination apps 共通トーン(暖色オレンジ × クリーム) */
+@theme {
+  --color-cream: #FFF6EA;
+  --color-cream-deep: #FBE9D3;
+  --color-orange: #E07A3E;
+  --color-orange-deep: #C85F28;
+  --color-orange-soft: #F3A870;
+  --color-ink: #3A2A1E;
+  --color-ink-soft: #6B584A;
+  --color-line: #EEDCC4;
+  --font-serif: "Shippori Mincho", "Noto Serif JP", Georgia, serif;
+  --font-sans: "Noto Sans JP", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+}
+
+html { background: var(--color-cream); }
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+button:not(:disabled) { cursor: pointer; }

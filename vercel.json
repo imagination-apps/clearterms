@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/translate.ts": { "maxDuration": 300 }
+  },
+  "crons": [
+    { "path": "/api/cron/keepalive", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/expiry-reminder", "schedule": "0 0 * * *" }
+  ],
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
