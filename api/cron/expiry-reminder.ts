@@ -1,12 +1,12 @@
 // 有効期限の14日前に、残り回数のあるユーザーへリマインドメールを送る(1日1回)
 import { EXPIRY_REMINDER_DAYS } from '../_lib/config.js'
 import { sendExpiryReminder } from '../_lib/emails.js'
-import { json, siteUrl, supabase } from '../_lib/server.js'
+import { isCronRequest, json, siteUrl, supabase } from '../_lib/server.js'
 
 type Row = { email: string; license_key: string; credits_remaining: number; expires_at: string }
 
 export async function GET(req: Request): Promise<Response> {
-  if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isCronRequest(req)) {
     return json({ error: 'unauthorized' }, 401)
   }
   const { data, error } = await supabase().rpc('clearterms_claim_expiring_packs', { p_days: EXPIRY_REMINDER_DAYS })

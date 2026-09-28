@@ -10,6 +10,21 @@ export function env(name: string): string {
   return v
 }
 
+/**
+ * 内部用の秘密値。環境変数があればそれを使い、なければ
+ * SUPABASE_SERVICE_ROLE_KEY から用途別に自動生成する(登録の手間を減らすため)。
+ */
+export function secret(name: 'SESSION_SECRET' | 'IP_HASH_SALT'): string {
+  return process.env[name] || createHmac('sha256', env('SUPABASE_SERVICE_ROLE_KEY')).update(`clearterms:${name}`).digest('hex')
+}
+
+/** Vercel Cron からの呼び出しか。CRON_SECRET があれば照合、なければ Vercel Cron の User-Agent で判定 */
+export function isCronRequest(req: Request): boolean {
+  const s = process.env.CRON_SECRET
+  if (s) return req.headers.get('authorization') === `Bearer ${s}`
+  return (req.headers.get('user-agent') ?? '').includes('vercel-cron')
+}
+
 let _sb: SupabaseClient | null = null
 export function supabase(): SupabaseClient {
   if (!_sb) {
@@ -55,11 +70,11 @@ export function clientIp(req: Request): string {
 
 /** IPはそのまま保存せず、ソルト付きハッシュのみ扱う */
 export function ipHash(req: Request): string {
-  return createHash('sha256').update(`${env('IP_HASH_SALT')}:${clientIp(req)}`).digest('hex')
+  return createHash('sha256').update(`${secret('IP_HASH_SALT')}:${clientIp(req)}`).digest('hex')
 }
 
 export function hashCode(email: string, code: string): string {
-  return createHmac('sha256', env('SESSION_SECRET')).update(`code:${email}:${code}`).digest('hex')
+  return createHmac('sha256', secret('SESSION_SECRET')).update(`code:${email}:${code}`).digest('hex')
 }
 
 export function sixDigitCode(): string {
@@ -83,14 +98,14 @@ const b64u = (b: Buffer | string) => Buffer.from(b).toString('base64url')
 
 export function signSession(email: string): string {
   const payload = b64u(JSON.stringify({ e: email, x: Date.now() + VERIFY.sessionDays * 86400_000 }))
-  const sig = createHmac('sha256', env('SESSION_SECRET')).update(payload).digest('base64url')
+  const sig = createHmac('sha256', secret('SESSION_SECRET')).update(payload).digest('base64url')
   return `${payload}.${sig}`
 }
 
 export function verifySession(token: unknown): string | null {
   if (typeof token !== 'string' || !token.includes('.')) return null
   const [payload, sig] = token.split('.')
-  const expected = createHmac('sha256', env('SESSION_SECRET')).update(payload).digest('base64url')
+  const expected = createHmac('sha256', secret('SESSION_SECRET')).update(payload).digest('base64url')
   const a = Buffer.from(sig)
   const b = Buffer.from(expected)
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null
@@ -104,5 +119,7 @@ export function verifySession(token: unknown): string | null {
 }
 
 export function siteUrl(req: Request): string {
-  return process.env.SITE_URL || new URL(req.url).origin
+  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, '')
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  return new URL(req.url).origin
 }

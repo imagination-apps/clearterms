@@ -1,6 +1,6 @@
 // メール文面(英語・日本語)
 import { PAID, VERIFY, type Lang } from './config.js'
-import { env, resend } from './server.js'
+import { resend } from './server.js'
 
 const BRAND = 'ClearTerms'
 const FOOTER = {
@@ -29,8 +29,23 @@ function fmtDate(iso: string, lang: Lang): string {
   })
 }
 
+// 送信元アドレス。MAIL_FROM があればそれを使い、なければ
+// Resend に登録済み(認証済み)のドメインから自動で決める(登録の手間を減らすため)
+let _from: string | null = null
+async function fromAddress(): Promise<string> {
+  if (process.env.MAIL_FROM) return process.env.MAIL_FROM
+  if (_from) return _from
+  const { data, error } = await resend().domains.list()
+  const domain = data?.data?.find((d) => d.status === 'verified')
+  if (error || !domain) {
+    throw new Error('MAIL_FROM is not set and no verified Resend domain was found')
+  }
+  _from = `ClearTerms <noreply@${domain.name}>`
+  return _from
+}
+
 async function send(to: string, subject: string, html: string) {
-  const { error } = await resend().emails.send({ from: env('MAIL_FROM'), to, subject, html })
+  const { error } = await resend().emails.send({ from: await fromAddress(), to, subject, html })
   if (error) throw new Error(`Resend error: ${error.message}`)
 }
 
