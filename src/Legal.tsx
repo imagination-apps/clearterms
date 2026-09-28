@@ -1,28 +1,35 @@
 import { PAID, FREE, type Lang } from '../api/_lib/config'
 
 // 利用規約・プライバシー・特定商取引法に基づく表記
-// ※ 特商法表記は CSV Bridge と内容を揃えてください(下記は「請求時開示」方式の例)
+// 特商法表記は Imagination apps 共通テンプレートに準拠。
+// ClearTerms 固有の項目(価格・有効期限・引渡し)のみ補足している。
+
+export const SUPPORT_EMAIL = 'imagination.support@gmail.com'
+const DISCLOSE = 'ご請求をいただいた場合、遅滞なく開示いたします。開示のご請求は下記のお問い合わせ窓口までご連絡ください。'
 
 export function LegalContent({ lang, kind }: { lang: Lang; kind: 'terms' | 'tokushoho' }) {
   if (kind === 'tokushoho') {
     const rows: [string, string][] = [
-      ['販売事業者', 'Imagination apps(運営責任者の氏名は、請求があった場合に遅滞なく開示します)'],
-      ['所在地・電話番号', '請求があった場合に遅滞なく開示します'],
-      ['お問い合わせ', 'X(旧Twitter)アカウント @rowyaaisaas へのDMにて'],
-      ['販売価格', `${PAID.priceLabel}(フル変換${PAID.creditsPerPack}回分パック)。表示価格以外の費用は発生しません`],
-      ['支払方法', 'クレジットカード等(Stripeによる決済)'],
-      ['支払時期', '購入手続き完了時'],
-      ['提供時期', '決済完了後すぐに利用可能(ライセンスキーをメールでお送りします)'],
-      ['有効期限', `購入日から${PAID.packValidityMonths}か月(延長不可)。期限を過ぎた未使用分は利用できません`],
-      ['返品・キャンセル', 'デジタル商品の性質上、購入後の返金は原則お受けできません。ただし、サービスの不具合により利用できない場合は個別に対応します'],
-      ['動作環境', '最新版のChrome / Safari / Edge / Firefox'],
+      ['販売事業者名(屋号)', 'Imagination apps'],
+      ['運営統括責任者(代表者名)', '江口 匡哉'],
+      ['所在地', DISCLOSE],
+      ['電話番号', DISCLOSE],
+      ['メールアドレス', SUPPORT_EMAIL],
+      ['販売価格', `各商品(ライセンス)のご購入画面に表示する価格(消費税込み)。ClearTerms:フル変換${PAID.creditsPerPack}回分パック ${PAID.priceLabel}`],
+      ['商品代金以外の必要料金', '特にございません(決済手数料等、追加でご負担いただく費用はありません)'],
+      ['お支払い方法', 'クレジットカード決済(Stripeの決済システムを利用しています)'],
+      ['お支払い時期', 'ご購入手続き完了時に決済されます'],
+      ['商品の引渡し時期', '決済完了後、画面上にライセンスキーが即時表示されるとともに、ご登録のメールアドレス宛に即時送信されます'],
+      ['有効期限', `ClearTermsのフル変換パックは、購入日から${PAID.packValidityMonths}か月間有効です(延長はできません)。期限を過ぎた未使用分はご利用いただけません`],
+      ['返品・キャンセルについて', 'デジタルコンテンツ(ライセンスキー)の性質上、購入後の返品・返金は原則としてお受けできません。ただし、システムの不具合等、当方の責めに帰すべき事由によりライセンスキーが正しく発行されない場合は、お問い合わせ窓口までご連絡ください。内容を確認のうえ個別に対応いたします。'],
+      ['動作環境', '最新版のGoogle Chrome、Safari、Microsoft Edge等のモダンブラウザ(JavaScriptが有効であること)'],
     ]
     return (
       <div>
         <h2 className="font-serif text-xl font-bold mb-4">特定商取引法に基づく表記</h2>
         <dl className="text-sm divide-y divide-line">
           {rows.map(([k, v]) => (
-            <div key={k} className="py-2 grid sm:grid-cols-[9rem_1fr] gap-1">
+            <div key={k} className="py-2 grid sm:grid-cols-[12rem_1fr] gap-1">
               <dt className="font-bold text-ink-soft">{k}</dt>
               <dd>{v}</dd>
             </div>
@@ -52,6 +59,7 @@ export function LegalContent({ lang, kind }: { lang: Lang; kind: 'terms' | 'toku
           <li><b>メールアドレス</b>:無料版の本人確認・利用回数の管理、購入時のライセンスキー送付、期限前のお知らせに使用します。</li>
           <li><b>IPアドレス</b>:不正利用防止のため、復元できない形(ハッシュ値)に変換して利用回数の管理にのみ使用します。</li>
           <li><b>決済情報</b>:Stripeが処理し、本ツールはカード情報を保持しません。</li>
+          <li>お問い合わせ:{SUPPORT_EMAIL}</li>
           <li>利用する外部サービス:Anthropic(AI処理)、Supabase(データベース)、Resend(メール送信)、Stripe(決済)、Vercel(ホスティング)。</li>
         </ul>
       </div>
@@ -77,6 +85,7 @@ export function LegalContent({ lang, kind }: { lang: Lang; kind: 'terms' | 'toku
         <li><b>Email address</b>: used to verify free usage, send your license key, and remind you before credits expire.</li>
         <li><b>IP address</b>: converted to a one-way hash and used only to limit abuse of the free version.</li>
         <li><b>Payments</b> are processed by Stripe; we never see your card details.</li>
+        <li>Contact: {SUPPORT_EMAIL}</li>
         <li>Services we use: Anthropic (AI), Supabase (database), Resend (email), Stripe (payments), Vercel (hosting).</li>
       </ul>
     </div>
