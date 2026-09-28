@@ -31,7 +31,7 @@
 2. **Anthropic Console**:APIキー発行・支払い設定、使用量の通知(例:$10)と月間上限(例:$30)を設定
 3. **Stripe**:商品「ClearTerms フル変換20回分パック」$9.99(1回払い)を作成し、価格ID(price_...)を控える
    - Webhook:エンドポイント `https://<ドメイン>/api/stripe-webhook`、イベント `checkout.session.completed` と `checkout.session.async_payment_succeeded`
-4. **Vercel**:Import → Framework は Vite。`.env.example` の「必須」を登録してデプロイ(「任意」は空欄で自動設定される)
+4. **Vercel**:Import → Framework は Vite。`docs/env-template.txt` の「必須」を登録してデプロイ(「任意」は空欄で自動設定される)
 5. 動作確認後、ハブページ(imagination-apps/home)の `data/products.json` に追記
 
 ## ローカル開発
