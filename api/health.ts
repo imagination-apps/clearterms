@@ -13,8 +13,20 @@ export async function GET(): Promise<Response> {
   } catch (e) {
     db = `error: ${(e as Error).message}`
   }
+  const checks: Record<string, string> = {}
+  const tryRpc = async (name: string, args: Record<string, unknown>) => {
+    try {
+      const { error } = await supabase().rpc(name, args)
+      checks[name] = error ? `error: ${error.message}` : 'ok'
+    } catch (e) {
+      checks[name] = `error: ${(e as Error).message}`
+    }
+  }
+  await tryRpc('clearterms_credit_status', { p_key: 'CT-TEST-TEST-TEST-TEST' })
+  await tryRpc('clearterms_free_remaining', { p_email: 'health@example.com', p_ip_hash: 'health', p_limit: 3 })
   return json({
     db,
+    checks,
     supabaseUrl: process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).host : 'missing',
     supabaseKey: keyKind,
     anthropicKey: process.env.ANTHROPIC_API_KEY?.startsWith('sk-ant-') ? 'set' : 'missing/invalid',
