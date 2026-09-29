@@ -13,7 +13,7 @@ export async function GET(req: Request): Promise<Response> {
   } catch {
     return json({ error: 'not_found' }, 404)
   }
-  if (session.metadata?.product !== PRODUCT_ID || session.payment_status !== 'paid') return json({ error: 'not_paid' }, 402)
+  if (session.metadata?.product !== PRODUCT_ID || (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required')) return json({ error: 'not_paid' }, 402)
 
   const { data: pack } = await supabase().from('clearterms_credit_packs').select('license_key').eq('stripe_session_id', id).maybeSingle()
   if (!pack) return json({ pending: true }) // Webhook 処理待ち

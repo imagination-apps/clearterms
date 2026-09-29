@@ -29,6 +29,7 @@ export async function POST(req: Request): Promise<Response> {
       ...(email ? { customer_email: email } : {}),
       metadata: { product: PRODUCT_ID, lang },
       custom_text: { submit: { message: expiryNote } },
+      allow_promotion_codes: true,
     })
     return json({ url: session.url })
   } catch (e) {

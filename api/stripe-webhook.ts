@@ -21,7 +21,10 @@ export async function POST(req: Request): Promise<Response> {
   }
   const session = event.data.object as Stripe.Checkout.Session
   if (session.metadata?.product !== PRODUCT_ID) return json({ received: true, skipped: 'other_product' })
-  if (session.payment_status !== 'paid') return json({ received: true, pending: true })
+  // 'no_payment_required' は100%割引クーポン等で支払額が0円の購入
+  if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') {
+    return json({ received: true, pending: true })
+  }
 
   const email = normalizeEmail(session.customer_details?.email ?? session.customer_email)
   if (!email) {
