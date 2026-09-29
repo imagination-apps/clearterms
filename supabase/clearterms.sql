@@ -68,6 +68,19 @@ alter table public.clearterms_free_usage   enable row level security;
 alter table public.clearterms_email_codes  enable row level security;
 alter table public.clearterms_code_sends   enable row level security;
 
+-- サーバー(service_role)にだけ読み書きを許可する
+-- (新しいSupabaseでは新規テーブルに自動で権限が付かない場合があるため明示)
+grant usage on schema public to service_role;
+grant select, insert, update, delete on
+  public.clearterms_licenses, public.clearterms_credit_packs, public.clearterms_free_usage,
+  public.clearterms_email_codes, public.clearterms_code_sends
+  to service_role;
+grant usage, select on sequence public.clearterms_code_sends_id_seq to service_role;
+revoke all on
+  public.clearterms_licenses, public.clearterms_credit_packs, public.clearterms_free_usage,
+  public.clearterms_email_codes, public.clearterms_code_sends
+  from anon, authenticated;
+
 -- ---------- 関数(すべて原子的に処理) ----------
 
 -- 確認コード送信の登録(クールダウン・IP上限をチェックしてから保存)
