@@ -24,8 +24,16 @@ export async function GET(): Promise<Response> {
   }
   await tryRpc('clearterms_credit_status', { p_key: 'CT-TEST-TEST-TEST-TEST' })
   await tryRpc('clearterms_free_remaining', { p_email: 'health@example.com', p_ip_hash: 'health', p_limit: 3 })
+  let packs = 'n/a'
+  try {
+    const { count, error } = await supabase().from('clearterms_credit_packs').select('id', { count: 'exact', head: true })
+    packs = error ? `error: ${error.message}` : String(count)
+  } catch (e) { packs = `error: ${(e as Error).message}` }
+  const wh = process.env.STRIPE_WEBHOOK_SECRET ?? ''
   return json({
     db,
+    packs,
+    webhookSecret: wh.startsWith('whsec_') ? `whsec_…(${wh.length})` : wh ? `invalid(${wh.slice(0, 4)}…)` : 'missing',
     checks,
     supabaseUrl: process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).host : 'missing',
     supabaseKey: keyKind,
